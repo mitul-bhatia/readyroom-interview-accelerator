@@ -4,7 +4,7 @@ Readyroom is a live AI interview accelerator for a specific job application. It 
 
 It focuses on interview preparation within [StudentCredibility's](https://studentcredibility.com) broader challenge of helping early-career candidates demonstrate convincing evidence of their skills.
 
-**[Open the live app](https://vibes-tawny.vercel.app)** · [Assignment coverage and limits](./ASSIGNMENT_REVIEW.md) · [Applicant recording script](./RECORDING_SCRIPT.md)
+**[Open the live app](https://vibes-tawny.vercel.app)**
 
 The example documents in the UI are fictional demo material. They prefill the form only; all analysis, questions, evaluations, and report text still call Groq live.
 
@@ -88,11 +88,3 @@ The key is never embedded in the frontend bundle. If no server key is configured
 ## Privacy and prototype limits
 
 Documents and answers are sent to Groq for analysis and evaluation. The server keeps no database or interview recordings. Completed reports are saved in the user's browser local storage; clearing browser storage removes them. There is no account or cross-device sync. PDF upload reads embedded text and does not OCR scanned images; for those, paste the extracted text. Files and recordings must stay under 4 MB to fit the Vercel Function request limit. Microphone recording works on HTTPS or localhost in a modern browser; typed answers remain available if microphone permission is denied.
-
-## Demo recording
-
-Follow the [complete recording script and shot list](./RECORDING_SCRIPT.md) to make the final submission video. It covers every required screen, a real microphone response, adaptive questioning, the report, the code tour, and accurate explanations of scoring and bonus features.
-
-The [assignment review](./ASSIGNMENT_REVIEW.md) maps each requirement and bonus to its actual implementation, including limits that should be described accurately in the demo.
-
-An earlier [synthetic reference capture](./demo/README.md) is available for internal rehearsal. It is not the applicant's final recording. Add the link to your own completed video here before submitting.
