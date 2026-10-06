@@ -30,7 +30,7 @@ npm run build
 4. Answer by voice or type. For voice, record, transcribe, review, then submit.
 5. Review the overall score, seven competency scores, question feedback, strengths, weaknesses, preparation plan, and readiness assessment. Save the report using the browser's PDF print flow.
 
-The optional camera is a local preview. It is never sent to an AI model or used for scoring.
+The optional camera is a local preview. It is never sent to an AI model or used for scoring. Speaking pace is calculated only for recorded voice answers of at least three seconds; filler and STAR indicators are approximate transcript/writing cues and do not determine the main score.
 
 ## Architecture
 
@@ -71,10 +71,13 @@ Document text and candidate answers are treated as untrusted data in the model i
 
 The repository is configured as a Vite project with one API function at `/api/index`.
 
-1. Import the GitHub repository into Vercel, or run `vercel` from this folder.
+1. Connect this GitHub repository in the existing Vercel project's **Settings → Git**. The project is already configured; subsequent pushes to `main` should deploy automatically.
 2. Add `GROQ_API_KEY` as a Vercel environment variable for Production and Preview.
-3. Deploy, then open the site and check that the top-right status reads **Groq connected**.
-4. Run a real interview with the fictional example documents before recording the demo.
+3. Push to `main`, wait for the Vercel Git deployment to finish, and check that the top-right status reads **Groq connected**.
+4. Open the production URL in a private window. Deployment protection must allow evaluators to enter without a Vercel login.
+5. Run a real interview with the fictional example documents before recording the demo.
+
+The day-to-day release commands are `npm test`, `npm run build`, `git add -A`, `git commit -m "Describe change"`, and `git push origin main`. The push triggers Vercel when the Git integration is connected. Do not put the key in a commit or a frontend `VITE_` variable.
 
 The key is never embedded in the frontend bundle. If no server key is configured, a candidate may enter a key in Settings; it remains only in the current tab's memory. Production should use the Vercel environment variable so evaluators do not need setup.
 
@@ -82,8 +85,8 @@ The key is never embedded in the frontend bundle. If no server key is configured
 
 Documents and answers are sent to Groq for analysis and evaluation. The server keeps no database or interview recordings. Completed reports are saved in the user's browser local storage; clearing browser storage removes them. There is no account or cross-device sync. PDF upload reads embedded text and does not OCR scanned images; for those, paste the extracted text. Microphone recording works on HTTPS or localhost in a modern browser; typed answers remain available if microphone permission is denied.
 
-## Demo
+## Demo recording
 
-Watch the [2-minute live walkthrough](./demo/readyroom-live-demo.mp4). It uses fictional example documents and a synthesized spoken answer to demonstrate real Groq transcription. The other answers are deliberately brief, so the final score exposes useful preparation gaps. The narration is synthesized for the screen recording.
+Follow the [complete recording script and shot list](./RECORDING_SCRIPT.md) to make the final submission video. It covers every required screen, a real microphone response, adaptive questioning, the report, the code tour, and accurate explanations of scoring and bonus features.
 
-See [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) for a concise plan if you want to record the same journey with your own voice.
+An earlier [synthetic reference capture](./demo/README.md) is available for internal rehearsal. It is not the applicant's final recording. Add the link to your own completed video here before submitting.

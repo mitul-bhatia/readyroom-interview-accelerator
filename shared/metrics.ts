@@ -20,15 +20,16 @@ export interface StarAnalysis {
 
 export interface StudyResource {
   title: string;
-  type: 'Article' | 'Documentation' | 'Practice' | 'Video Guide';
+  type: 'Search';
   query: string;
 }
 
 const COMMON_FILLERS = [
-  'um', 'uh', 'like', 'you know', 'basically', 'literally', 'actually', 'sort of', 'kind of', 'i mean', 'right'
+  'um', 'uh', 'erm', 'you know', 'sort of', 'kind of', 'i mean'
 ];
 
-export function analyzeSpeech(text: string, durationSeconds?: number): SpeechMetrics {
+export function analyzeSpeech(text: string, durationSeconds: number): SpeechMetrics {
+  if (!Number.isFinite(durationSeconds) || durationSeconds < 3) throw new Error('A measured voice recording of at least three seconds is required for speaking metrics.');
   const clean = text.trim();
   const words = clean.split(/\s+/).filter(Boolean);
   const wordCount = words.length;
@@ -48,22 +49,18 @@ export function analyzeSpeech(text: string, durationSeconds?: number): SpeechMet
     }
   }
 
-  // Duration: use measured seconds if voice, otherwise estimate typical speaking duration (~135 wpm)
-  const duration = durationSeconds && durationSeconds > 1
-    ? durationSeconds
-    : Math.max(6, Math.round((wordCount / 135) * 60));
-
+  const duration = durationSeconds;
   const wpm = Math.round((wordCount / Math.max(duration, 3)) * 60);
 
   let paceRating: SpeechMetrics['paceRating'] = 'Ideal Pace';
-  let paceAdvice = 'Optimal conversational speaking pace.';
+  let paceAdvice = 'A conversational speaking pace based on the recorded answer.';
 
   if (wpm < 110) {
     paceRating = 'Too Slow';
-    paceAdvice = 'Slightly slow delivery. Aim for 120–150 WPM to maintain interviewer momentum.';
+    paceAdvice = 'This transcript suggests a slower pace. Try shorter pauses between points.';
   } else if (wpm <= 160) {
     paceRating = 'Ideal Pace';
-    paceAdvice = 'Natural conversational cadence (120–150 WPM). Clear and easy to follow.';
+    paceAdvice = 'This transcript suggests a conversational pace.';
   } else if (wpm <= 190) {
     paceRating = 'A Bit Fast';
     paceAdvice = 'Brisk speaking tempo. Pausing between points improves retention.';
@@ -74,13 +71,13 @@ export function analyzeSpeech(text: string, durationSeconds?: number): SpeechMet
 
   let deliveryTip = '';
   if (totalFillers === 0) {
-    deliveryTip = 'Crisp, filler-free communication. Shows strong composure.';
+    deliveryTip = 'No common fillers were found in this transcript. Transcription may omit spoken fillers.';
   } else if (totalFillers <= 2) {
     const names = detectedFillers.map(f => `"${f.word}"`).join(', ');
-    deliveryTip = `Low filler usage (${totalFillers} total: ${names}). Replacing filler sounds with brief silences will project even higher confidence.`;
+    deliveryTip = `${totalFillers} possible filler${totalFillers === 1 ? '' : 's'} in the transcript (${names}). A brief pause can help when choosing your next point.`;
   } else {
     const names = detectedFillers.slice(0, 3).map(f => `"${f.word}"`).join(', ');
-    deliveryTip = `${totalFillers} filler words noticed (${names}). Practice silent pauses when formulating thoughts.`;
+    deliveryTip = `${totalFillers} possible fillers in the transcript (${names}). Practice silent pauses when forming thoughts.`;
   }
 
   return {
@@ -101,18 +98,18 @@ export function analyzeStarStructure(text: string): StarAnalysis {
   const hasSituation = /\b(when|at|during|project|context|company|team|pilot|scenario|in my)\b/i.test(lower);
   const hasTask = /\b(needed to|goal|task|objective|responsible for|challenge|requirement|problem)\b/i.test(lower);
   const hasAction = /\b(i built|i designed|i implemented|i created|i decided|i led|i developed|i fixed|my approach)\b/i.test(lower);
-  const hasResult = /\b(result|improved|reduced|increased|boosted|%|metric|outcome|feedback|impact|survey|users)\b/i.test(lower);
+  const hasResult = /\b(result|improved|reduced|increased|boosted|metric|outcome|impact)\b|\d+\s*%/i.test(lower);
 
   const elements = [hasSituation, hasTask, hasAction, hasResult].filter(Boolean).length;
-  const starScore = elements === 4 ? 100 : elements === 3 ? 80 : elements === 2 ? 60 : 40;
+  const starScore = elements * 25;
 
   let feedback = '';
   if (elements === 4) {
-    feedback = 'Complete STAR structure demonstrated (Situation, Task, Action, and Quantified Result).';
+    feedback = 'The wording contains cues for all four STAR elements. Check that the result has clear evidence; this is a keyword-based writing aid.';
   } else if (!hasResult) {
-    feedback = 'Good breakdown of Context and Action, but lacks a quantified Result or Metric (e.g. latency, user impact, % gain).';
+    feedback = 'Add a concrete result, ideally with a metric and how you measured it.';
   } else if (!hasAction) {
-    feedback = 'Context is described well, but emphasize your individual Action and technical decisions more directly.';
+    feedback = 'Explain your own action and the decision you made.';
   } else {
     feedback = 'Frame this using the STAR method: 1) Context, 2) Specific Task, 3) Your Exact Action, 4) Measurable Result.';
   }
@@ -125,48 +122,47 @@ export function getStudyResources(topic: string): StudyResource[] {
 
   if (clean.includes('rag') || clean.includes('retrieval') || clean.includes('vector') || clean.includes('embedding')) {
     return [
-      { title: 'Pinecone / LangChain RAG Architecture Guide', type: 'Documentation', query: 'RAG retrieval architecture chunking vector database' },
-      { title: 'RAG Evaluation Metrics (Ragas & Context Precision)', type: 'Article', query: 'RAG evaluation context precision recall faithfulness' },
-      { title: 'Designing Production Vector Search Pipelines', type: 'Practice', query: 'production vector search reranking best practices' },
+      { title: 'RAG architecture and chunking', type: 'Search', query: 'RAG retrieval architecture chunking vector database' },
+      { title: 'RAG evaluation and faithfulness', type: 'Search', query: 'RAG evaluation context precision recall faithfulness' },
+      { title: 'Vector search and reranking', type: 'Search', query: 'production vector search reranking best practices' },
     ];
   }
 
   if (clean.includes('evaluation') || clean.includes('metric') || clean.includes('benchmark')) {
     return [
-      { title: 'LLM Evaluation Methodologies & Benchmarks', type: 'Article', query: 'LLM evaluation test dataset ground truth metrics' },
-      { title: 'A/B Testing and Offline Model Evaluation', type: 'Documentation', query: 'offline model evaluation baseline measurement' },
-      { title: 'Designing LLM Test Sets for Edge Cases', type: 'Practice', query: 'designing test sets for AI application reliability' },
+      { title: 'LLM evaluation datasets and metrics', type: 'Search', query: 'LLM evaluation test dataset ground truth metrics' },
+      { title: 'Baselines and offline evaluation', type: 'Search', query: 'offline model evaluation baseline measurement' },
+      { title: 'Edge-case test sets', type: 'Search', query: 'designing test sets for AI application reliability' },
     ];
   }
 
   if (clean.includes('system design') || clean.includes('architecture') || clean.includes('scale')) {
     return [
-      { title: 'System Design Primer (Scalability & Caching)', type: 'Documentation', query: 'system design primer caching queues microservices' },
-      { title: 'API Rate Limiting and Resilience Patterns', type: 'Article', query: 'API rate limiting retry backoff circuit breaker' },
-      { title: 'Mock System Design Interview Exercises', type: 'Practice', query: 'interactive system design interview mock problems' },
+      { title: 'Caching, queues, and scaling', type: 'Search', query: 'system design primer caching queues microservices' },
+      { title: 'Rate limits and resilient APIs', type: 'Search', query: 'API rate limiting retry backoff circuit breaker' },
+      { title: 'System design practice prompts', type: 'Search', query: 'interactive system design interview mock problems' },
     ];
   }
 
   if (clean.includes('react') || clean.includes('frontend') || clean.includes('ui')) {
     return [
-      { title: 'React 19 Hooks & Concurrency Patterns', type: 'Documentation', query: 'react 19 official documentation hooks state management' },
-      { title: 'Web Audio API & MediaStream Implementation', type: 'Article', query: 'MDN Web Audio API MediaRecorder userMedia' },
-      { title: 'Frontend Accessibility (a11y) & Performance Audits', type: 'Practice', query: 'web accessibility WCAG performance optimization' },
+      { title: 'React state and hooks', type: 'Search', query: 'site:react.dev learn state hooks' },
+      { title: 'Browser recording APIs', type: 'Search', query: 'site:developer.mozilla.org MediaRecorder getUserMedia' },
+      { title: 'Accessibility and performance', type: 'Search', query: 'site:web.dev learn accessibility performance' },
     ];
   }
 
   if (clean.includes('node') || clean.includes('backend') || clean.includes('api')) {
     return [
-      { title: 'Production Express & Node.js Error Handling', type: 'Documentation', query: 'nodejs production error handling streaming best practices' },
-      { title: 'RESTful API Design & Contract Testing', type: 'Article', query: 'REST API design idempotency status codes' },
-      { title: 'Handling File Uploads and Streaming Buffers Safely', type: 'Practice', query: 'multer streaming memory storage nodejs security' },
+      { title: 'Node.js error handling', type: 'Search', query: 'site:nodejs.org/api/errors.html error handling' },
+      { title: 'API contracts and status codes', type: 'Search', query: 'REST API design idempotency status codes' },
+      { title: 'Safe file upload handling', type: 'Search', query: 'multer streaming memory storage nodejs security' },
     ];
   }
 
-  // Default fallback resources
   return [
-    { title: `${topic} Technical Deep Dive & Core Concepts`, type: 'Documentation', query: `${topic} core concepts interview guide` },
-    { title: 'Common Interview Questions & Failure Modes', type: 'Article', query: `${topic} common interview pitfalls trade-offs` },
-    { title: 'Hands-on Practice Problems & Scenarios', type: 'Practice', query: `${topic} real world scenario interview practice` },
+    { title: `${topic}: core concepts`, type: 'Search', query: `${topic} core concepts interview guide` },
+    { title: `${topic}: common tradeoffs`, type: 'Search', query: `${topic} common interview pitfalls trade-offs` },
+    { title: `${topic}: practice scenarios`, type: 'Search', query: `${topic} real world scenario interview practice` },
   ];
 }

@@ -95,12 +95,12 @@ export function buildReport(analysis: Analysis, turns: Turn[], raw: Narrative): 
     };
   });
 
-  const metricsList = turns.map(t => t.speechMetrics).filter((m): m is NonNullable<typeof m> => !!m);
+  const metricsList = turns.filter(t => t.answerSource === 'voice').map(t => t.speechMetrics).filter((m): m is NonNullable<typeof m> => !!m);
   let deliverySummary: Report['deliverySummary'];
   if (metricsList.length > 0) {
     const avgWpm = Math.round(metricsList.reduce((acc, m) => acc + m.wpm, 0) / metricsList.length);
     const totalFillers = metricsList.reduce((acc, m) => acc + m.totalFillers, 0);
-    const voiceAnswersCount = turns.filter(t => t.answerSource === 'voice').length;
+    const voiceAnswersCount = metricsList.length;
     let paceRating: NonNullable<Report['deliverySummary']>['paceRating'] = 'Ideal Pace';
     let overallPaceAdvice = 'Well-controlled conversational pacing throughout the interview.';
     if (avgWpm < 110) {
@@ -136,4 +136,3 @@ export function buildReport(analysis: Analysis, turns: Turn[], raw: Narrative): 
     deliverySummary,
   };
 }
-

@@ -104,7 +104,8 @@ export default function App() {
   const submitAnswer = () => void run('Evaluating your answer…', async () => {
     if (!analysis || !question || answer.trim().length < 12) throw new Error('Give a fuller answer before continuing.');
     const result = await api<{ feedback: Turn['feedback']; nextQuestion: Question | null }>('turn', { analysis, turns, question, answer: answer.trim() }, key);
-    const speechMetrics = analyzeSpeech(answer.trim(), answerDuration);
+    const speechMetrics = answerSource === 'voice' && answerDuration && answerDuration >= 3
+      ? analyzeSpeech(answer.trim(), answerDuration) : undefined;
     const starAnalysis = analyzeStarStructure(answer.trim());
     const nextTurns: Turn[] = [...turns, {
       question,
@@ -124,13 +125,14 @@ export default function App() {
   const generateReport = () => void run('Writing your performance report…', async () => {
     if (!analysis) return;
     const result = await api<Report>('report', { analysis, turns }, key);
-    const prev = history.find(h => h.report.roleTitle.toLowerCase() === analysis.role.title.toLowerCase()) || history[0];
+    const prev = history.find(h => h.report.roleTitle.toLowerCase() === analysis.role.title.toLowerCase()
+      && h.report.candidateName.toLowerCase() === analysis.candidate.name.toLowerCase());
     if (prev && prev.report) {
       const delta = result.overallScore - prev.report.overallScore;
       result.comparison = {
         previousScore: prev.report.overallScore,
         scoreDelta: delta,
-        deltaLabel: delta > 0 ? `+${delta}% score increase from last session` : delta === 0 ? 'Score matches previous session' : `${delta}% vs previous session`,
+        deltaLabel: delta > 0 ? `+${delta} points from last session` : delta === 0 ? 'Same score as last session' : `${delta} points from last session`,
       };
     }
     setReport(result); setView('report'); setShowFeedback(false); window.scrollTo(0, 0);
@@ -216,8 +218,8 @@ export default function App() {
           </div>}
           {latestTurn.starAnalysis && <div className="star-container">
             <div className="star-container-head">
-              <strong>STAR Framework Breakdown</strong>
-              <span>{latestTurn.starAnalysis.starScore}% complete</span>
+              <strong>STAR writing cues</strong>
+              <span>{latestTurn.starAnalysis.starScore}% of cues found</span>
             </div>
             <div className="star-badge-row">
               <span className={`star-pill ${latestTurn.starAnalysis.hasSituation ? 'active' : ''}`}>S · Context</span>
@@ -233,7 +235,7 @@ export default function App() {
           <div><strong>What worked</strong><p>{latestTurn.feedback.good}</p></div>
           <div><strong>Try next time</strong><p>{latestTurn.feedback.improve}</p></div>
         </div>
-        <div className="panel-bottom">{question ? <button className="button primary full" onClick={nextQuestion}>Next question <ArrowRight size={18} /></button> : <button className="button primary full" disabled={!!busy} onClick={generateReport}>See my report <ArrowRight size={18} /></button>}</div></> : <><div className="panel-header"><div><span className="panel-overline">Your turn</span><h2>Answer out loud</h2></div><span className="answer-hint">Voice or text</span></div><p className="answer-description">Speak naturally. Your answer will appear below so you can review it before submitting.</p><div className="record-control"><button className={`record-button ${recording ? 'recording' : ''}`} disabled={!!busy} onClick={recording ? stopRecording : startRecording}>{recording ? <Square size={25} fill="currentColor" /> : <Mic size={29} />}</button><div><strong>{recording ? 'Recording…' : busy.includes('Transcribing') ? 'Transcribing…' : 'Tap to record'}{recording && <span className="recording-wave"><span className="wave-bar" /><span className="wave-bar" /><span className="wave-bar" /><span className="wave-bar" /></span>}</strong><span>{recording ? 'Tap the square when you finish' : 'Microphone access is requested only when you record'}</span></div></div><div className="answer-divider"><span>or type your answer</span></div><label className="answer-label" htmlFor="answer-text">Answer transcript</label><textarea id="answer-text" className="answer-textarea" value={answer} onChange={event => { setAnswer(event.target.value); setAnswerSource('typed'); }} placeholder="Your answer will appear here after recording. You can edit it before submitting." /><div className="answer-count">{answer.trim().length} characters · {answerSource === 'voice' ? 'voice answer' : 'typed answer'}</div><div className="panel-bottom"><button className="button primary full" disabled={!!busy || recording || answer.trim().length < 12} onClick={submitAnswer}>Submit answer <ArrowRight size={18} /></button><p>We assess the content of your answer, not your camera image.</p></div></>}</aside></div>
+        <div className="panel-bottom">{question ? <button className="button primary full" onClick={nextQuestion}>Next question <ArrowRight size={18} /></button> : <button className="button primary full" disabled={!!busy} onClick={generateReport}>See my report <ArrowRight size={18} /></button>}</div></> : <><div className="panel-header"><div><span className="panel-overline">Your turn</span><h2>Answer out loud</h2></div><span className="answer-hint">Voice or text</span></div><p className="answer-description">Speak naturally. Your answer will appear below so you can review it before submitting.</p><div className="record-control"><button className={`record-button ${recording ? 'recording' : ''}`} disabled={!!busy} onClick={recording ? stopRecording : startRecording}>{recording ? <Square size={25} fill="currentColor" /> : <Mic size={29} />}</button><div><strong>{recording ? 'Recording…' : busy.includes('Transcribing') ? 'Transcribing…' : 'Tap to record'}{recording && <span className="recording-wave"><span className="wave-bar" /><span className="wave-bar" /><span className="wave-bar" /><span className="wave-bar" /><span className="wave-bar" /></span>}</strong><span>{recording ? 'Tap the square when you finish' : 'Microphone access is requested only when you record'}</span></div></div><div className="answer-divider"><span>or type your answer</span></div><label className="answer-label" htmlFor="answer-text">Answer transcript</label><textarea id="answer-text" className="answer-textarea" value={answer} onChange={event => setAnswer(event.target.value)} placeholder="Your answer will appear here after recording. You can edit it before submitting." /><div className="answer-count">{answer.trim().length} characters · {answerSource === 'voice' ? 'recorded answer, transcript editable' : 'typed answer'}</div><div className="panel-bottom"><button className="button primary full" disabled={!!busy || recording || answer.trim().length < 12} onClick={submitAnswer}>Submit answer <ArrowRight size={18} /></button><p>We assess the content of your answer, not your camera image.</p></div></>}</aside></div>
         <div className="transcript-row"><div><Clock3 size={17} /><span>Conversation so far</span></div><span>{turns.length} answered</span></div>{turns.length > 0 && <div className="transcript-list">{turns.map((turn, index) => <details key={index}><summary><span>{String(index + 1).padStart(2, '0')}</span><strong>{turn.question.text}</strong><ChevronDown size={17} /></summary><div><p>{turn.answer}</p><small>{turn.answerSource === 'voice' ? `Voice${turn.durationSeconds ? ` · ${turn.durationSeconds}s` : ''}` : 'Typed'} · Score {turn.feedback.score}/100</small></div></details>)}</div>}
       </div>}
 
@@ -247,9 +249,9 @@ export default function App() {
             <p>{report.deliverySummary.paceRating}: {report.deliverySummary.overallPaceAdvice}</p>
           </div>
           <div className="delivery-metric-box">
-            <span>Verbal Fillers Detected</span>
+            <span>Possible Fillers in Voice Transcripts</span>
             <b>{report.deliverySummary.totalFillers}</b>
-            <p>{report.deliverySummary.totalFillers === 0 ? 'Remarkably clean delivery without filler sounds.' : `${report.deliverySummary.totalFillers} filler words detected across all responses.`}</p>
+            <p>{report.deliverySummary.totalFillers === 0 ? 'No common fillers found; transcription may omit spoken fillers.' : `${report.deliverySummary.totalFillers} possible fillers found in recorded answers.`}</p>
           </div>
           <div className="delivery-metric-box">
             <span>Voice Response Ratio</span>
@@ -259,7 +261,7 @@ export default function App() {
         </div>}
         <div className="score-method"><CircleHelp size={16} /><p>Overall score combines interview competencies (80%) and JD alignment (20%). Job fit measures evidence for required skills. Confidence reflects ownership and specificity in answers; video is never analysed.</p></div>
         <div className="report-grid"><section><h2>Competency scores</h2><div className="competency-list">{Object.entries(report.competencies).map(([name, score]) => <div key={name}><div><span>{name}</span><b>{score}</b></div><div className="score-track"><span className={scoreColor(score)} style={{ width: `${score}%` }} /></div></div>)}</div></section><section className="report-list-section"><div><h2>What you did well</h2><BulletList items={report.strengths} /></div><div><h2>Where to grow</h2><BulletList items={report.weaknesses} /></div></section></div>
-        <section className="plan-section"><div className="section-heading-row"><div><h2>Your preparation plan</h2><p>Start with the highest impact gap before your real interview.</p></div></div><div className="plan-grid">{report.gaps.map(gap => <div className="plan-item" key={gap.priority}><span>Priority {gap.priority}</span><h3>{gap.topic}</h3><p>{gap.why}</p><strong>Review next</strong><BulletList items={gap.review} />{gap.resources && gap.resources.length > 0 && <div className="resource-block"><strong>Recommended resources</strong><div className="resource-list">{gap.resources.map((res, rIdx) => <a key={rIdx} className="resource-item" href={`https://www.google.com/search?q=${encodeURIComponent(res.query)}`} target="_blank" rel="noreferrer"><div><span className="resource-tag">{res.type}</span><span>{res.title}</span></div><ExternalLink size={13} /></a>)}</div></div>}</div>)}</div></section>
+        <section className="plan-section"><div className="section-heading-row"><div><h2>Your preparation plan</h2><p>Start with the highest impact gap before your real interview.</p></div></div><div className="plan-grid">{report.gaps.map(gap => <div className="plan-item" key={gap.priority}><span>Priority {gap.priority}</span><h3>{gap.topic}</h3><p>{gap.why}</p><strong>Review next</strong><BulletList items={gap.review} />{gap.resources && gap.resources.length > 0 && <div className="resource-block"><strong>Study searches</strong><div className="resource-list">{gap.resources.map((res, rIdx) => <a key={rIdx} className="resource-item" href={`https://www.google.com/search?q=${encodeURIComponent(res.query)}`} target="_blank" rel="noreferrer"><div><span className="resource-tag">{res.type}</span><span>{res.title}</span></div><ExternalLink size={13} /></a>)}</div></div>}</div>)}</div></section>
         <section className="question-feedback"><div className="section-heading-row"><div><h2>Question-by-question feedback</h2><p>See exactly how each answer landed and what a stronger direction looks like.</p></div></div><div className="question-list">{report.turns.map((turn, index) => <details key={index} open={index === 0}><summary><div><span>Question {index + 1} · {LEVEL_LABELS[turn.question.level]}</span><strong>{turn.question.text}</strong></div><div><b className={scoreColor(turn.feedback.score)}>{turn.feedback.score}/100</b><ChevronDown size={19} /></div></summary><div className="question-detail"><div><h4>Your answer</h4><p>{turn.answer}</p>{turn.speechMetrics && <div className="delivery-badge-row" style={{ marginTop: '10px' }}><span className={`metric-pill ${turn.speechMetrics.paceRating === 'Ideal Pace' ? 'ideal' : 'warn'}`}><Gauge size={12} /> {turn.speechMetrics.wpm} WPM ({turn.speechMetrics.paceRating})</span><span className={`metric-pill ${turn.speechMetrics.totalFillers === 0 ? 'ideal' : 'warn'}`}><Zap size={12} /> {turn.speechMetrics.totalFillers === 0 ? '0 Fillers' : `${turn.speechMetrics.totalFillers} Fillers`}</span>{turn.starAnalysis && <span className="metric-pill info">STAR: {turn.starAnalysis.starScore}%</span>}</div>}</div><div><h4>Assessment</h4><p>{turn.feedback.assessment}</p></div><div><h4>What was good</h4><p>{turn.feedback.good}</p></div><div><h4>What to improve</h4><p>{turn.feedback.improve}</p></div><div className="ideal-direction"><h4>Ideal direction</h4><p>{turn.feedback.idealDirection}</p></div></div></details>)}</div></section>
         <div className="report-end"><div><Sparkles size={19} /><span>Want to see progress? Practise this role again after reviewing your plan.</span></div><button className="button primary" onClick={reset}><RotateCcw size={17} /> New session</button></div>
       </div>}

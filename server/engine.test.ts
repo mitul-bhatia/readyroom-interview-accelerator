@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildReport, levelForTurn, scoreFit } from './engine';
+import { analyzeSpeech, analyzeStarStructure } from '../shared/metrics';
 import type { Analysis, Turn } from '../shared/types';
 
 const role = {
@@ -47,4 +48,30 @@ test('generous model ratings cannot turn weak answers into interview readiness',
   assert.equal(report.readiness, 'Needs Preparation');
   assert.ok(report.overallScore < 70);
   assert.equal(report.competencies['Role Fit'], 93);
+});
+
+test('speaking pace needs an actual measured recording and fillers use conservative transcript cues', () => {
+  assert.throws(() => analyzeSpeech('I built the product', 0), /measured voice recording/);
+  const metrics = analyzeSpeech('I actually like this approach. Um, I mean the measured result.', 10);
+  assert.equal(metrics.durationSeconds, 10);
+  assert.equal(metrics.totalFillers, 2);
+  assert.deepEqual(metrics.fillerWords.map(item => item.word), ['um', 'i mean']);
+});
+
+test('STAR cues do not invent a result or award points when none are found', () => {
+  assert.equal(analyzeStarStructure('Hello there.').starScore, 0);
+  const cues = analyzeStarStructure('During the project, my task was to help users. I built the interface.');
+  assert.equal(cues.hasResult, false);
+  assert.equal(cues.starScore, 75);
+});
+
+test('delivery summary excludes typed answers even if stale metrics are supplied', () => {
+  const analysis: Analysis = {
+    role, candidate: { name: 'Aarav', summary: '', skills: [], experience: [], projects: [], achievements: [], strengths: [], weakAreas: [], claimsToProbe: [], preparation: [] },
+    fit: { score: 50, verdict: 'Developing match', items: [], explanation: '' }, mode: 'live',
+  };
+  const base = { question: { text: 'Why?', level: 'screening', focus: '' }, answer: 'A specific answer.', feedback: { score: 65, assessment: '', good: '', improve: '', idealDirection: '', competencies: [] } } satisfies Partial<Turn>;
+  const typed: Turn = { ...base, answerSource: 'typed', speechMetrics: analyzeSpeech('Um, I built the product', 10) };
+  const report = buildReport(analysis, Array(6).fill(typed), {});
+  assert.equal(report.deliverySummary, undefined);
 });
