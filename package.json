@@ -1,0 +1,34 @@
+{
+  "name": "readyroom-interview-accelerator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k \"node --import tsx server/index.ts\" \"vite --host 0.0.0.0\"",
+    "build": "tsc --noEmit && vite build",
+    "start": "node --import tsx server/index.ts",
+    "test": "node --import tsx --test server/*.test.ts"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "lucide-react": "^0.468.0",
+    "mammoth": "^1.9.1",
+    "multer": "^2.0.2",
+    "pdf-parse": "2.4.5",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "concurrently": "^9.2.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.1.0"
+  }
+}
