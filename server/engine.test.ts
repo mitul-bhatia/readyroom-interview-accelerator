@@ -35,3 +35,16 @@ test('readiness and overall score combine interview performance with job fit', (
   assert.equal(report.competencies['Role Fit'], 50);
   assert.equal(report.gaps[0].priority, 1);
 });
+
+test('generous model ratings cannot turn weak answers into interview readiness', () => {
+  const analysis: Analysis = {
+    role, candidate: { name: 'Aarav', summary: '', skills: [], experience: [], projects: [], achievements: [], strengths: [], weakAreas: [], claimsToProbe: [], preparation: [] },
+    fit: { score: 93, verdict: 'Strong match', items: [], explanation: '' }, mode: 'live',
+  };
+  const turn = { question: { text: 'Explain your approach.', level: 'screening', focus: '' }, answer: 'A short unrelated answer.', feedback: { score: 28, assessment: '', good: '', improve: '', idealDirection: '', competencies: [] }, answerSource: 'typed' } satisfies Turn;
+  const ratings = Object.fromEntries(['Technical Knowledge', 'Problem Solving', 'Communication', 'Confidence', 'Depth of Understanding', 'Behavioural Fit'].map(name => [name, 85]));
+  const report = buildReport(analysis, Array(6).fill(turn), { competencies: ratings });
+  assert.equal(report.readiness, 'Needs Preparation');
+  assert.ok(report.overallScore < 70);
+  assert.equal(report.competencies['Role Fit'], 93);
+});

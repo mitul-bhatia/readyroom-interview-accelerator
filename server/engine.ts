@@ -72,7 +72,11 @@ const COMPETENCY_NAMES = ['Role Fit', 'Technical Knowledge', 'Problem Solving', 
 export function buildReport(analysis: Analysis, turns: Turn[], raw: Narrative): Report {
   const provided = raw.competencies && typeof raw.competencies === 'object' ? raw.competencies as Record<string, unknown> : {};
   const average = turns.length ? Math.round(turns.reduce((sum, turn) => sum + turn.feedback.score, 0) / turns.length) : 0;
-  const competencies = Object.fromEntries(COMPETENCY_NAMES.map(name => [name, name === 'Role Fit' ? analysis.fit.score : clampScore(provided[name] ?? average)])) as Report['competencies'];
+  const competencies = Object.fromEntries(COMPETENCY_NAMES.map(name => {
+    if (name === 'Role Fit') return [name, analysis.fit.score];
+    const modelRating = clampScore(provided[name] ?? average);
+    return [name, Math.round(modelRating * 0.35 + average * 0.65)];
+  })) as Report['competencies'];
   const interviewAverage = Math.round(COMPETENCY_NAMES.slice(1).reduce((sum, name) => sum + competencies[name], 0) / 6);
   const overallScore = Math.round(interviewAverage * 0.8 + analysis.fit.score * 0.2);
   const readiness = overallScore >= 85 && analysis.fit.score >= 75 ? 'Strong Candidate' : overallScore >= 70 ? 'Interview Ready' : overallScore >= 50 ? 'Needs Preparation' : 'Not Ready';

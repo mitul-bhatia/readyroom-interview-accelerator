@@ -63,7 +63,7 @@ Document text and candidate answers are treated as untrusted data in the model i
 
 - Each answer receives a 0–100 score for relevance (25), accuracy (25), depth (20), specificity and evidence (20), and clarity (10), plus concrete strengths, improvements, and an ideal direction.
 - Job fit is computed from the required JD skills. Applied evidence in the resume counts as **1**, limited or skills-list-only evidence as **0.5**, and no evidence as **0**. The score is the weighted average across required skills. It is an evidence score, not a hiring probability.
-- The report model rates Technical Knowledge, Problem Solving, Communication, Confidence, Depth of Understanding, and Behavioural Fit. Role Fit is the calculated job fit score. Overall score is **80%** the average of the six interview competencies and **20%** job fit.
+- The report model rates Technical Knowledge, Problem Solving, Communication, Confidence, Depth of Understanding, and Behavioural Fit. Each rating is calibrated against the average question score (35% model rating, 65% question evidence) so an upbeat summary cannot outweigh weak answers. Role Fit is the calculated job fit score. Overall score is **80%** the average of the six interview competencies and **20%** job fit.
 - Readiness: below 50 = Not Ready; 50–69 = Needs Preparation; 70–84 = Interview Ready; 85+ with job fit at least 75 = Strong Candidate. These are coaching thresholds, not claims about a real employer's decision.
 - “Confidence” means specificity and ownership in answers. Facial expression and emotion are not analysed.
 
