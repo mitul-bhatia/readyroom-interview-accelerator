@@ -67,6 +67,8 @@ type Narrative = {
   gaps?: unknown;
 };
 
+import { getStudyResources } from '../shared/metrics.js';
+
 const COMPETENCY_NAMES = ['Role Fit', 'Technical Knowledge', 'Problem Solving', 'Communication', 'Confidence', 'Depth of Understanding', 'Behavioural Fit'] as const;
 
 export function buildReport(analysis: Analysis, turns: Turn[], raw: Narrative): Report {
@@ -83,8 +85,40 @@ export function buildReport(analysis: Analysis, turns: Turn[], raw: Narrative): 
   const rawGaps = Array.isArray(raw.gaps) ? raw.gaps : [];
   const gaps = rawGaps.slice(0, 3).map((gap, index) => {
     const item = gap && typeof gap === 'object' ? gap as Record<string, unknown> : {};
-    return { priority: index + 1, topic: asText(item.topic, `Preparation area ${index + 1}`), why: asText(item.why, 'This area needs stronger evidence.'), review: asList(item.review, 5) };
+    const topic = asText(item.topic, `Preparation area ${index + 1}`);
+    return {
+      priority: index + 1,
+      topic,
+      why: asText(item.why, 'This area needs stronger evidence.'),
+      review: asList(item.review, 5),
+      resources: getStudyResources(topic),
+    };
   });
+
+  const metricsList = turns.map(t => t.speechMetrics).filter((m): m is NonNullable<typeof m> => !!m);
+  let deliverySummary: Report['deliverySummary'];
+  if (metricsList.length > 0) {
+    const avgWpm = Math.round(metricsList.reduce((acc, m) => acc + m.wpm, 0) / metricsList.length);
+    const totalFillers = metricsList.reduce((acc, m) => acc + m.totalFillers, 0);
+    const voiceAnswersCount = turns.filter(t => t.answerSource === 'voice').length;
+    let paceRating: NonNullable<Report['deliverySummary']>['paceRating'] = 'Ideal Pace';
+    let overallPaceAdvice = 'Well-controlled conversational pacing throughout the interview.';
+    if (avgWpm < 110) {
+      paceRating = 'Too Slow';
+      overallPaceAdvice = 'Pacing tended toward the slower side. Aim for 120–150 WPM.';
+    } else if (avgWpm <= 160) {
+      paceRating = 'Ideal Pace';
+      overallPaceAdvice = 'Consistently solid conversational tempo (120–150 WPM).';
+    } else if (avgWpm <= 190) {
+      paceRating = 'A Bit Fast';
+      overallPaceAdvice = 'Brisk tempo. Inserting strategic pauses will boost clarity.';
+    } else {
+      paceRating = 'Rushed';
+      overallPaceAdvice = 'Overall delivery was rushed. Practice breathing and pausing between key metrics.';
+    }
+    deliverySummary = { avgWpm, totalFillers, voiceAnswersCount, paceRating, overallPaceAdvice };
+  }
+
   return {
     overallScore,
     readiness,
@@ -99,5 +133,7 @@ export function buildReport(analysis: Analysis, turns: Turn[], raw: Narrative): 
     roleTitle: analysis.role.title,
     candidateName: analysis.candidate.name,
     createdAt: new Date().toISOString(),
+    deliverySummary,
   };
 }
+

@@ -47,6 +47,31 @@ export interface Question {
   focus: string;
 }
 
+import type { SpeechMetrics, StarAnalysis, StudyResource } from './metrics.js';
+export type { SpeechMetrics, StarAnalysis, StudyResource };
+
+export interface PrepGap {
+  priority: number;
+  topic: string;
+  why: string;
+  review: string[];
+  resources?: StudyResource[];
+}
+
+export interface DeliverySummary {
+  avgWpm: number;
+  totalFillers: number;
+  voiceAnswersCount: number;
+  paceRating: 'Too Slow' | 'Ideal Pace' | 'A Bit Fast' | 'Rushed';
+  overallPaceAdvice: string;
+}
+
+export interface SessionComparison {
+  previousScore: number;
+  scoreDelta: number;
+  deltaLabel: string;
+}
+
 export interface Feedback {
   score: number;
   assessment: string;
@@ -62,6 +87,8 @@ export interface Turn {
   feedback: Feedback;
   answerSource: 'voice' | 'typed';
   durationSeconds?: number;
+  speechMetrics?: SpeechMetrics;
+  starAnalysis?: StarAnalysis;
 }
 
 export interface Report {
@@ -71,13 +98,16 @@ export interface Report {
   competencies: Record<'Role Fit' | 'Technical Knowledge' | 'Problem Solving' | 'Communication' | 'Confidence' | 'Depth of Understanding' | 'Behavioural Fit', number>;
   strengths: string[];
   weaknesses: string[];
-  gaps: { priority: number; topic: string; why: string; review: string[] }[];
+  gaps: PrepGap[];
   turns: Turn[];
   fitScore: number;
   mode: Mode;
   roleTitle: string;
   candidateName: string;
   createdAt: string;
+  deliverySummary?: DeliverySummary;
+  comparison?: SessionComparison;
 }
 
 export interface SavedSession { id: string; report: Report; }
+

@@ -62,3 +62,20 @@ test('a short Groq rate limit is retried without losing the live response', asyn
     assert.equal(attempts, 2);
   } finally { globalThis.fetch = originalFetch; }
 });
+
+test('multi-key failover switches to the backup key if the primary key fails or rate-limits', async () => {
+  const originalFetch = globalThis.fetch;
+  const usedKeys: string[] = [];
+  globalThis.fetch = async (_url, init) => {
+    const auth = (init?.headers as Record<string, string>)?.Authorization || '';
+    usedKeys.push(auth);
+    if (auth.includes('key1')) return new Response('{"error":{"message":"Key 1 quota exceeded"}}', { status: 429 });
+    return new Response(JSON.stringify({ choices: [{ message: { content: '{"status":"success"}' } }] }), { status: 200 });
+  };
+  try {
+    const result = await groqJSON<{ status: string }>('key1, key2', 'Prompt', 'Message');
+    assert.deepEqual(result, { status: 'success' });
+    assert.deepEqual(usedKeys, ['Bearer key1', 'Bearer key2']);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
