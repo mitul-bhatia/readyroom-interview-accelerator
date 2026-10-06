@@ -5,7 +5,7 @@ const API = 'https://api.groq.com/openai/v1';
 const MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
 
 export async function groqJSON<T>(key: string, system: string, user: string, maxTokens = 1200): Promise<T> {
-  const response = await fetch(`${API}/chat/completions`, {
+  const request = () => fetch(`${API}/chat/completions`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -18,6 +18,17 @@ export async function groqJSON<T>(key: string, system: string, user: string, max
     }),
     signal: AbortSignal.timeout(55_000),
   });
+  let response = await request();
+  if (response.status === 429) {
+    const detail = await response.clone().text();
+    const header = response.headers.get('retry-after');
+    const seconds = header ? Number(header) : Number(detail.match(/try again in ([\d.]+)s/i)?.[1]);
+    if (Number.isFinite(seconds) && seconds >= 0 && seconds <= 25) {
+      await new Promise(resolve => setTimeout(resolve, Math.ceil((seconds + 0.6) * 1000)));
+      response = await request();
+    }
+  }
+  if (response.status === 429) throw new Error('Groq is temporarily rate-limited. Wait about 30 seconds, then retry this step.');
   if (!response.ok) {
     const body = await response.json().catch(() => ({})) as { error?: { message?: string } };
     throw new Error(body.error?.message || `Groq request failed (${response.status}).`);
@@ -64,6 +75,11 @@ export async function startInterview(key: string, analysis: Analysis): Promise<Q
 
 export async function interviewTurn(key: string, analysis: Analysis, turns: Turn[], question: Question, answer: string) {
   const nextLevel = levelForTurn(turns.length + 1);
+  const askedQuestions = [...turns.map(turn => turn.question.text), question.text].join(' ').toLowerCase();
+  const untestedSkills = analysis.role.requiredSkills.filter(skill => !askedQuestions.includes(skill.split(/\s+or\s+|\/|,/i)[0].trim().toLowerCase()));
+  const target = nextLevel === 'competency' ? (untestedSkills[0] || analysis.role.requiredSkills[turns.length % analysis.role.requiredSkills.length])
+    : nextLevel === 'deep-dive' && question.level !== 'deep-dive' ? (analysis.fit.items.find(item => item.status !== 'strong')?.skill || analysis.candidate.claimsToProbe[0])
+      : '';
   const history = turns.map((turn, index) => ({ index: index + 1, level: turn.question.level, focus: turn.question.focus, question: turn.question.text, answer: turn.answer.slice(0, 500), score: turn.feedback.score, strength: turn.feedback.good.slice(0, 140), weakness: turn.feedback.improve.slice(0, 140) }));
   const context = {
     role: { title: analysis.role.title, requiredSkills: analysis.role.requiredSkills, responsibilities: analysis.role.responsibilities.slice(0, 5), technicalCompetencies: analysis.role.technicalCompetencies.slice(0, 6), behaviouralCompetencies: analysis.role.behaviouralCompetencies.slice(0, 5) },
@@ -72,9 +88,10 @@ export async function interviewTurn(key: string, analysis: Analysis, turns: Turn
     history,
     currentQuestion: question,
     answer: answer.slice(0, 3000),
+    nextQuestionTarget: target,
   };
   const raw = await groqJSON<{ feedback: unknown; nextQuestion?: unknown }>(key,
-    `You are an adaptive interview evaluator. Assess the candidate's actual answer against the question, role and resume. Score 0-100 using relevance 25, factual/technical accuracy 25, depth 20, specificity/evidence 20, clarity 10. Do not award points for unsupported claims. Identify a concrete good point and improvement, and describe a stronger answer without writing a script for the candidate. Output JSON: {"feedback":{"score":number,"assessment":"...","good":"...","improve":"...","idealDirection":"...","competencies":["..."]}${nextLevel ? ',"nextQuestion":{"text":"...","focus":"..."}' : ''}}. ${nextLevel ? `Then ask exactly one ${nextLevel} question. It MUST depend on the latest answer. Ground every reference to the candidate in their actual latest answer, history, or resume evidence. Never write "you mentioned", "you implemented", or similar attribution unless the record literally supports it; frame unverified details as a hypothetical scenario. For a weak answer, a precise follow-up is useful, but do not probe the same topic for more than two consecutive questions. For a strong answer, challenge a tradeoff, failure mode, metric, or realistic scenario. On a level transition, switch to another relevant JD requirement or resume claim and bridge from the latest answer. Use the history to avoid repeating prior questions.` : 'This was the final answer; do not ask another question.'}`,
+    `You are an adaptive interview evaluator. Assess the candidate's actual answer against the question, role and resume. Score 0-100 using relevance 25, factual/technical accuracy 25, depth 20, specificity/evidence 20, clarity 10. Do not award points for unsupported claims. Identify a concrete good point and improvement, and describe a stronger answer without writing a script for the candidate. Output JSON: {"feedback":{"score":number,"assessment":"...","good":"...","improve":"...","idealDirection":"...","competencies":["..."]}${nextLevel ? ',"nextQuestion":{"text":"...","focus":"..."}' : ''}}. ${nextLevel ? `Then ask exactly one ${nextLevel} question. It MUST depend on the latest answer. Ground every reference to the candidate in their actual latest answer, history, or resume evidence. Never write "you mentioned", "you implemented", or similar attribution unless the record literally supports it; frame unverified details as a hypothetical scenario. For a weak answer, a precise follow-up is useful, but do not probe the same topic for more than two consecutive questions. For a strong answer, challenge a tradeoff, failure mode, metric, or realistic scenario. On a level transition, switch to another relevant JD requirement or resume claim and bridge from the latest answer. Use the history to avoid repeating prior questions. ${target ? `Mandatory new focus for the next question: ${target}. Ask about this distinct requirement using the candidate's actual evidence or a clearly hypothetical scenario.` : ''}` : 'This was the final answer; do not ask another question.'}`,
     JSON.stringify(context), 1200);
   return { feedback: normalizeFeedback(raw.feedback), nextQuestion: nextLevel ? normalizeQuestion(raw.nextQuestion, nextLevel) : null };
 }

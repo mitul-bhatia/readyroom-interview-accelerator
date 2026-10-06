@@ -84,4 +84,6 @@ Documents and answers are sent to Groq for analysis and evaluation. The server k
 
 ## Demo
 
-See [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) for a concise recording plan and the exact journey to show.
+Watch the [2-minute live walkthrough](./demo/readyroom-live-demo.mp4). It uses fictional example documents and a synthesized spoken answer to demonstrate real Groq transcription. The other answers are deliberately brief, so the final score exposes useful preparation gaps. The narration is synthesized for the screen recording.
+
+See [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) for a concise plan if you want to record the same journey with your own voice.

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { analyze, interviewTurn, reportInterview, startInterview, transcribe } from './ai';
+import { analyze, groqJSON, interviewTurn, reportInterview, startInterview, transcribe } from './ai';
 import type { Turn } from '../shared/types';
 
 test('the live AI flow carries document and answer context through all three levels', async () => {
@@ -45,5 +45,20 @@ test('the live AI flow carries document and answer context through all three lev
     const transcript = await transcribe('test-key', { buffer: Buffer.from('audio'), mimetype: 'audio/webm', originalname: 'answer.webm' } as Express.Multer.File);
     assert.match(transcript, /interface/);
     assert.equal(calls.filter(call => call.url.includes('/chat/completions')).length, 9);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('a short Groq rate limit is retried without losing the live response', async () => {
+  const originalFetch = globalThis.fetch;
+  let attempts = 0;
+  globalThis.fetch = async () => {
+    attempts++;
+    if (attempts === 1) return new Response('{"error":{"message":"Rate limit reached"}}', { status: 429, headers: { 'retry-after': '0' } });
+    return new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":true}' } }] }), { status: 200 });
+  };
+  try {
+    const result = await groqJSON<{ ok: boolean }>('test-key', 'Answer in JSON.', 'Say ok.');
+    assert.deepEqual(result, { ok: true });
+    assert.equal(attempts, 2);
   } finally { globalThis.fetch = originalFetch; }
 });
