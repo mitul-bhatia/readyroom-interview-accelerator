@@ -82,6 +82,7 @@ export default function App() {
 
   const parseFile = (kind: DocKind, file?: File) => {
     if (!file) return;
+    if (file.size > 4 * 1024 * 1024) { setError('Use a file under 4 MB, or paste its text.'); return; }
     void run(`Reading ${kind === 'jd' ? 'job description' : 'resume'}…`, async () => {
       const form = new FormData(); form.append('file', file);
       const data = await api<{ text: string }>('parse', form, key);
@@ -154,6 +155,7 @@ export default function App() {
         setRecording(false);
         const seconds = Math.max(1, Math.round((Date.now() - recordStart.current) / 1000));
         const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+        if (blob.size > 4 * 1024 * 1024) { setError('This recording is too large. Try a shorter answer or type it.'); return; }
         void run('Transcribing your answer…', async () => {
           const form = new FormData(); form.append('file', blob, blob.type.includes('mp4') ? 'answer.mp4' : 'answer.webm');
           const data = await api<{ text: string }>('transcribe', form, key);
@@ -190,7 +192,7 @@ export default function App() {
 
       {view === 'setup' && <div className="page setup-page">
         <section className="intro-grid"><div className="intro-copy"><h1>Walk in ready<span className="period">.</span></h1><p>Practice the interview for the job you actually want. Add the role and your resume; we’ll find the overlap, ask the right questions, and show you what to work on.</p><div className="intro-points"><span><CheckCircle2 size={17} /> Grounded in your documents</span><span><CheckCircle2 size={17} /> Voice-first practice</span><span><CheckCircle2 size={17} /> Actionable feedback</span></div></div><div className="intro-aside"><div className="aside-top"><span className="aside-icon"><Sparkles size={20} /></span><span>How it works</span></div><div className="aside-flow"><div><span>01</span><p>Understand the role and where you stand.</p></div><div><span>02</span><p>Move through three adaptive interview levels.</p></div><div><span>03</span><p>Leave with a clear preparation plan.</p></div></div></div></section>
-        <div className="section-heading-row"><div><h2>Start with the evidence</h2><p>Paste text or upload PDF, DOCX, TXT, or MD files.</p></div><button className="text-button" onClick={() => { setJd(sampleJD); setResume(sampleResume); clearError(); }}><Sparkles size={16} /> Fill example documents</button></div>
+        <div className="section-heading-row"><div><h2>Start with the evidence</h2><p>Paste text or upload PDF, DOCX, TXT, or MD files under 4 MB.</p></div><button className="text-button" onClick={() => { setJd(sampleJD); setResume(sampleResume); clearError(); }}><Sparkles size={16} /> Fill example documents</button></div>
         <div className="document-grid"><DocumentPanel kind="jd" title="Job description" subtitle="What the employer is asking for" value={jd} onChange={setJd} onFile={file => parseFile('jd', file)} /><DocumentPanel kind="resume" title="Your resume" subtitle="The experience you bring" value={resume} onChange={setResume} onFile={file => parseFile('resume', file)} /></div>
         <div className="setup-action"><div><ShieldCheck size={19} /><span>Documents are analysed for this session. Reports stay in this browser.</span></div><button className="button primary" disabled={!!busy || jd.trim().length < 120 || resume.trim().length < 120} onClick={analyzeDocuments}>Analyse my fit <ArrowRight size={18} /></button></div>
         {history.length > 0 && <section className="history-section"><div className="section-heading-row"><div><h2>Past practice</h2><p>Your recent reports, saved on this device.</p></div></div><div className="history-list">{history.map(item => <button key={item.id} onClick={() => { setReport(item.report); setView('report'); window.scrollTo(0, 0); }}><div><strong>{item.report.roleTitle}</strong><span>{new Date(item.report.createdAt).toLocaleDateString()}</span></div><div><b>{item.report.overallScore}/100</b><ArrowRight size={18} /></div></button>)}</div></section>}

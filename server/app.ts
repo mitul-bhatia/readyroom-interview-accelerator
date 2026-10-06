@@ -8,7 +8,7 @@ import type { Analysis, Question, Turn } from '../shared/types.js';
 import { MAX_TURNS } from './engine.js';
 
 const app = express();
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 4 * 1024 * 1024 } });
 app.disable('x-powered-by');
 app.use(express.json({ limit: '1mb' }));
 
@@ -96,7 +96,7 @@ app.post('/api/index', upload.single('file'), async (req, res) => {
 });
 
 app.use((error: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  res.status(400).json({ error: error instanceof multer.MulterError ? 'File is too large. Use a file under 20 MB.' : error.message });
+  res.status(400).json({ error: error instanceof multer.MulterError ? 'File is too large. Use a file under 4 MB.' : error.message });
 });
 
 export default app;
