@@ -61,7 +61,7 @@ Finalist in a university hackathon for an accessible learning tool.
 
 | Time | Show and do | Say (use your own natural delivery) |
 | --- | --- | --- |
-| 0:00–0:25 | Open Readyroom landing screen, pause on the three-step explanation. | “A student often has a resume and a job description but no clear view of what the employer values, which claims will be challenged, or what to practise. Readyroom turns those two documents into a role-specific interview and a concrete preparation plan.” |
+| 0:00–0:25 | Open Readyroom landing screen, pause on the three-step explanation. | “StudentCredibility focuses on a real early-career problem: candidates may have skills but struggle to show convincing evidence. For the interview stage, a student often has a resume and job description yet does not know which claims will be challenged. Readyroom turns those documents into role-specific practice and a concrete preparation plan.” |
 | 0:25–0:55 | Point to **Job description** and **Your resume**, upload controls, then click **Fill example documents**. Scroll just enough to show both populated fields. | “Candidates can paste text or upload PDF, DOCX, TXT, or Markdown. I’m using clearly labelled fictional documents so anyone can reproduce this run. The example button only fills the inputs; the AI analysis and interview are live.” |
 | 0:55–1:20 | Click **Analyse my fit**. Show the loading state briefly, then role title and fit score. | “The server asks Groq to analyse the JD and resume independently. It extracts responsibilities, required and preferred skills, competencies, qualifications, and the candidate’s evidence. The fit percentage is computed from required-skill evidence; it is a preparation signal, not a hiring probability.” |
 | 1:20–1:45 | Scroll the **Understand the role** tab: responsibilities, required/preferred skills, competencies, concepts. | “This view decodes the employer’s requirements before starting the interview. It helps the candidate focus on the actual role instead of generic interview questions.” |
@@ -136,6 +136,10 @@ For a question these cards do not cover, answer in your own words. The evaluator
 ## Architecture sentence if asked
 
 “React handles the interview UI, audio capture, playback, and local report history. One Express API in a Vercel Function validates inputs, parses files, and calls Groq for JSON analysis, adaptive evaluation, report writing, and Whisper transcription. Shared TypeScript contracts and a deterministic scoring layer keep the output consistent. The candidate’s camera preview stays in the browser.”
+
+## Why these choices if asked
+
+“I kept the prototype focused on the candidate’s immediate preparation problem. The JD and resume are small enough to analyse directly, so I did not add a vector database just for the sake of it. The server owns prompts, validation, and secrets; React owns the interactive experience; the deterministic scoring layer makes the fit and readiness logic inspectable. Browser TTS makes the interviewer audible without another paid service, and local report history keeps the first version simple. A future version would add a measured evaluation set for question relevance and feedback quality before claiming calibrated real-world interview predictions.”
 
 ## Scoring sentence if asked
 

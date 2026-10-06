@@ -2,6 +2,8 @@
 
 Readyroom is a live AI interview accelerator for a specific job application. It reads a job description and resume, explains the candidate's fit, conducts a voice-capable three-level interview, and produces evidence-based feedback and a preparation plan.
 
+It focuses on interview preparation within [StudentCredibility's](https://studentcredibility.com) broader challenge of helping early-career candidates demonstrate convincing evidence of their skills.
+
 **[Open the live app](https://vibes-tawny.vercel.app)** · [Assignment coverage and limits](./ASSIGNMENT_REVIEW.md) · [Applicant recording script](./RECORDING_SCRIPT.md)
 
 The example documents in the UI are fictional demo material. They prefill the form only; all analysis, questions, evaluations, and report text still call Groq live.
