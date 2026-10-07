@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="560" viewBox="0 0 1600 560" role="img" aria-labelledby="title desc">
+  <title id="title">Readyroom — Walk in ready</title>
+  <desc id="desc">A visual overview of the interview accelerator journey from documents to adaptive practice to actionable feedback.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#142a20"/>
+      <stop offset="0.55" stop-color="#1c392a"/>
+      <stop offset="1" stop-color="#304e38"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="78%" cy="32%" r="60%">
+      <stop offset="0" stop-color="#a9c597" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#a9c597" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="22" stdDeviation="24" flood-color="#091811" flood-opacity=".25"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="560" rx="30" fill="url(#bg)"/>
+  <rect width="1600" height="560" rx="30" fill="url(#glow)"/>
+  <circle cx="1385" cy="85" r="245" fill="none" stroke="#d9ebc5" stroke-opacity=".08" stroke-width="2"/>
+  <circle cx="1385" cy="85" r="350" fill="none" stroke="#d9ebc5" stroke-opacity=".06" stroke-width="2"/>
+  <g transform="translate(92 75)">
+    <rect width="42" height="42" rx="12" fill="#d7e9bc"/>
+    <path d="M13 20v5m5-12v19m5-23v27m5-20v13m5-7v3" stroke="#244734" stroke-width="3" stroke-linecap="round"/>
+    <text x="56" y="31" fill="#f8f7ef" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" letter-spacing="-.8">readyroom<tspan fill="#b8d5a6">.</tspan></text>
+  </g>
+  <text x="92" y="217" fill="#c9dfb6" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="700" letter-spacing="3">AI INTERVIEW ACCELERATOR</text>
+  <text x="92" y="315" fill="#f8f7ef" font-family="Georgia,Times New Roman,serif" font-size="91" letter-spacing="-3">Walk in ready<tspan fill="#aed095">.</tspan></text>
+  <text x="95" y="369" fill="#d5dfd1" font-family="Arial,Helvetica,sans-serif" font-size="23">Your role. Your experience. An interview that responds to both.</text>
+  <g font-family="Arial,Helvetica,sans-serif" font-size="16" fill="#e6eee1">
+    <circle cx="103" cy="433" r="14" fill="#cfdfbd"/><path d="m97 433 4 4 8-9" fill="none" stroke="#254332" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="128" y="439">Grounded in your documents</text>
+    <circle cx="400" cy="433" r="14" fill="#cfdfbd"/><path d="m394 433 4 4 8-9" fill="none" stroke="#254332" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="425" y="439">Voice-first practice</text>
+  </g>
+  <g transform="translate(1040 132)" filter="url(#shadow)">
+    <rect width="472" height="320" rx="24" fill="#f8f7ef"/>
+    <rect x="25" y="24" width="422" height="54" rx="12" fill="#e7ecdf"/>
+    <circle cx="50" cy="51" r="13" fill="#2b5039"/>
+    <text x="74" y="57" fill="#294332" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700">Your preparation journey</text>
+    <path d="M57 112v160" stroke="#c8d4c2" stroke-width="2"/>
+    <g font-family="Arial,Helvetica,sans-serif">
+      <circle cx="57" cy="125" r="22" fill="#2d523b"/><text x="47" y="132" fill="#fff" font-size="18" font-weight="700">01</text>
+      <text x="95" y="122" fill="#20392a" font-size="20" font-weight="700">Understand the fit</text><text x="95" y="147" fill="#687b6c" font-size="15">JD requirements × resume evidence</text>
+      <circle cx="57" cy="202" r="22" fill="#2d523b"/><text x="47" y="209" fill="#fff" font-size="18" font-weight="700">02</text>
+      <text x="95" y="199" fill="#20392a" font-size="20" font-weight="700">Practice by voice</text><text x="95" y="224" fill="#687b6c" font-size="15">Three adaptive interview levels</text>
+      <circle cx="57" cy="279" r="22" fill="#2d523b"/><text x="47" y="286" fill="#fff" font-size="18" font-weight="700">03</text>
+      <text x="95" y="276" fill="#20392a" font-size="20" font-weight="700">Know what to improve</text><text x="95" y="301" fill="#687b6c" font-size="15">Evidence-led feedback and next steps</text>
+    </g>
+  </g>
+</svg>

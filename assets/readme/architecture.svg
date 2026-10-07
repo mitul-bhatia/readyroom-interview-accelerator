@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="610" viewBox="0 0 1500 610" role="img" aria-labelledby="title desc">
+  <title id="title">Readyroom architecture</title>
+  <desc id="desc">React browser, Vercel Express API, Groq chat and Whisper, browser speech synthesis, and local report history.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M2 2 10 6 2 10" fill="none" stroke="#75977c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <filter id="s" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#253c2c" flood-opacity=".07"/></filter>
+  </defs>
+  <rect width="1500" height="610" rx="28" fill="#f5f5ef"/>
+  <text x="72" y="75" fill="#20382a" font-family="Georgia,Times New Roman,serif" font-size="44">Built as one focused pipeline</text>
+  <text x="74" y="111" fill="#647469" font-family="Arial,Helvetica,sans-serif" font-size="18">The product owns the journey, validation and scoring; models supply language understanding and transcription.</text>
+  <g font-family="Arial,Helvetica,sans-serif" filter="url(#s)">
+    <rect x="72" y="174" width="320" height="210" rx="24" fill="#e7eee3" stroke="#cdd9ca"/>
+    <rect x="96" y="199" width="91" height="28" rx="14" fill="#d0dfc8"/><text x="111" y="218" fill="#31553a" font-size="13" font-weight="700">BROWSER</text>
+    <text x="96" y="270" fill="#223b2b" font-size="30" font-weight="700">React + TypeScript</text>
+    <text x="96" y="310" fill="#5b705f" font-size="18">Documents · interview UI</text>
+    <text x="96" y="339" fill="#5b705f" font-size="18">Recording · transcript review</text>
+    <rect x="592" y="174" width="320" height="210" rx="24" fill="#284d39"/>
+    <rect x="616" y="199" width="148" height="28" rx="14" fill="#3b644b"/><text x="632" y="218" fill="#dfefda" font-size="13" font-weight="700">VERCEL FUNCTION</text>
+    <text x="616" y="270" fill="#f8f8ef" font-size="30" font-weight="700">Express API</text>
+    <text x="616" y="310" fill="#d8e6d3" font-size="18">Parse · validate · prompt</text>
+    <text x="616" y="339" fill="#d8e6d3" font-size="18">Evidence scoring · report</text>
+    <rect x="1112" y="174" width="316" height="210" rx="24" fill="#e5e9d9" stroke="#d7dccb"/>
+    <rect x="1136" y="199" width="98" height="28" rx="14" fill="#d2ddc4"/><text x="1157" y="218" fill="#31553a" font-size="13" font-weight="700">GROQ API</text>
+    <text x="1136" y="270" fill="#223b2b" font-size="30" font-weight="700">Live AI</text>
+    <text x="1136" y="310" fill="#5b705f" font-size="18">GPT-OSS: analysis + turns</text>
+    <text x="1136" y="339" fill="#5b705f" font-size="18">Whisper: speech-to-text</text>
+  </g>
+  <path d="M407 277h164" fill="none" stroke="#75977c" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="432" y="256" fill="#5d775f" font-family="Arial,Helvetica,sans-serif" font-size="16">JSON + audio</text>
+  <path d="M927 277h164" fill="none" stroke="#75977c" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="966" y="256" fill="#5d775f" font-family="Arial,Helvetica,sans-serif" font-size="16">server key</text>
+  <g font-family="Arial,Helvetica,sans-serif">
+    <rect x="72" y="432" width="646" height="112" rx="20" fill="#fff" stroke="#e0e5d9"/>
+    <circle cx="111" cy="470" r="17" fill="#d9e8d1"/><path d="M104 468v7m6-13v19m6-15v11" stroke="#2e593c" stroke-width="2" stroke-linecap="round"/>
+    <text x="145" y="475" fill="#294330" font-size="19" font-weight="700">Browser voice</text>
+    <text x="145" y="507" fill="#647469" font-size="17">Speech synthesis reads questions; MediaRecorder captures answers.</text>
+    <rect x="782" y="432" width="646" height="112" rx="20" fill="#fff" stroke="#e0e5d9"/>
+    <circle cx="821" cy="470" r="17" fill="#d9e8d1"/><path d="M813 469h16m-16 5h12m-12 5h8" stroke="#2e593c" stroke-width="2" stroke-linecap="round"/>
+    <text x="855" y="475" fill="#294330" font-size="19" font-weight="700">Private-by-device history</text>
+    <text x="855" y="507" fill="#647469" font-size="17">Reports remain in local storage and can be printed as PDF.</text>
+  </g>
+</svg>
