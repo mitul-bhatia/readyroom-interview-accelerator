@@ -12,6 +12,8 @@
 <p align="center">
   <a href="https://vibes-tawny.vercel.app"><strong>Open the live app ↗</strong></a>
   &nbsp;·&nbsp;
+  <a href="https://drive.google.com/file/d/1TyhKiYOm6eflt-mnXC2ci0_EkRlerxrH/view?usp=sharing"><strong>Watch the demo video ▶</strong></a>
+  &nbsp;·&nbsp;
   <a href="#see-the-product">See the product</a>
   &nbsp;·&nbsp;
   <a href="#bring-your-own-api-key-byoa">Bring your own API key</a>
@@ -31,6 +33,10 @@
 | :--- | :--- | :--- |
 | See what the role requires and where your resume has evidence. | Answer six questions that react to what you said. | Leave with scores, answer-level feedback, and a ranked study plan. |
 | **Role analysis + job fit** | **Voice or text interview** | **Readiness report** |
+
+## Demo video
+
+**[▶ Watch the recorded product demo](https://drive.google.com/file/d/1TyhKiYOm6eflt-mnXC2ci0_EkRlerxrH/view?usp=sharing)** on Google Drive. The video is shared with anyone who has the link.
 
 ## See the product
 
