@@ -13,7 +13,7 @@ app.disable('x-powered-by');
 app.use(express.json({ limit: '1mb' }));
 
 function keyFrom(req: express.Request) {
-  return process.env.GROQ_API_KEY || req.header('x-groq-api-key')?.trim() || '';
+  return req.header('x-groq-api-key')?.trim() || process.env.GROQ_API_KEY || '';
 }
 
 function requireKey(req: express.Request) {

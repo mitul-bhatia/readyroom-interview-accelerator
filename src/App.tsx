@@ -85,7 +85,7 @@ export default function App() {
     if (file.size > 4 * 1024 * 1024) { setError('Use a file under 4 MB, or paste its text.'); return; }
     void run(`Reading ${kind === 'jd' ? 'job description' : 'resume'}…`, async () => {
       const form = new FormData(); form.append('file', file);
-      const data = await api<{ text: string }>('parse', form, key);
+      const data = await api<{ text: string }>('parse', form, '');
       (kind === 'jd' ? setJd : setResume)(data.text);
     });
   };
@@ -269,7 +269,18 @@ export default function App() {
       </div>}
     </main>
 
-    {settingsOpen && <div className="modal-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setSettingsOpen(false); }}><div className="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title"><div className="modal-top"><div><span className="mini-label">Live AI connection</span><h2 id="settings-title">Groq settings</h2></div><button className="icon-button" onClick={() => setSettingsOpen(false)} aria-label="Close settings"><X size={19} /></button></div><p>Readyroom uses Groq for document analysis, adaptive questions, answer evaluation, reports, and speech transcription.</p>{serverKey ? <div className="connection-confirmation"><CheckCircle2 size={19} /> A server key is configured. You’re ready to practise.</div> : <><label htmlFor="groq-key">Groq API key</label><input id="groq-key" type="password" autoComplete="off" value={key} onChange={event => setKey(event.target.value)} placeholder="gsk_…" /><small>Your key stays in this browser tab and is sent only to this app’s API for Groq requests. It is not saved in local storage.</small><a href="https://console.groq.com/keys" target="_blank" rel="noreferrer">Create a key in Groq Console <ArrowRight size={15} /></a></>}<button className="button primary full" onClick={() => setSettingsOpen(false)}>{connected ? 'Continue' : 'Done'} <ArrowRight size={17} /></button></div></div>}
+    {settingsOpen && <div className="modal-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) setSettingsOpen(false); }}>
+      <div className="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div className="modal-top"><div><span className="mini-label">Live AI connection</span><h2 id="settings-title">Groq settings</h2></div><button className="icon-button" onClick={() => setSettingsOpen(false)} aria-label="Close settings"><X size={19} /></button></div>
+        <p>Readyroom uses Groq for document analysis, adaptive questions, answer evaluation, reports, and speech transcription.</p>
+        {serverKey && <div className="connection-confirmation"><CheckCircle2 size={19} /> The shared demo is ready. Your own key is optional.</div>}
+        <label htmlFor="groq-key">Bring your own API key {serverKey && '(optional)'}</label>
+        <input id="groq-key" type="password" autoComplete="off" value={key} onChange={event => setKey(event.target.value)} placeholder="gsk_…" />
+        <small>Your key takes precedence over the demo key. It stays in this tab’s memory, is sent over HTTPS to this app’s API for Groq requests, and is never saved in local storage. Clear this field or close the tab to remove it.</small>
+        <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer">Create a key in Groq Console <ArrowRight size={15} /></a>
+        <button className="button primary full" onClick={() => setSettingsOpen(false)}>{connected ? 'Continue' : 'Done'} <ArrowRight size={17} /></button>
+      </div>
+    </div>}
 
     <footer className="footer"><span>readyroom<span className="brand-dot">.</span></span><span>Better practice makes better interviews.</span><span>Built for the Interview Accelerator challenge</span></footer>
   </div>;
