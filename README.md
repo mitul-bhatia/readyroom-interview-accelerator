@@ -101,7 +101,9 @@ These are coaching signals, not a hiring prediction. “Confidence” measures s
 
 ## Bring your own API key (BYOA)
 
-Readyroom supports **BYOA: Bring Your Own API Key**. Open **Groq settings** in the app, [create a Groq key](https://console.groq.com/keys) if needed, and paste it into the password field. Your key takes priority over the shared demo key for analysis, questions, evaluation, reports, and transcription. Clear the field to return to the shared demo connection.
+**Our BYOA policy:** your Groq key is your choice. Open **Groq settings** in the app, [create a key](https://console.groq.com/keys) if needed, and paste it into the password field. Your key takes priority over the shared demo key for analysis, questions, evaluation, reports, and transcription. Clear the field to return to the shared demo connection.
+
+[![Readyroom Groq settings showing the optional Bring Your Own API Key field alongside the shared live demo](assets/readme/06-byoa-settings.jpg)](assets/readme/06-byoa-settings.jpg)
 
 The key lives only in the current tab’s memory. It is sent over HTTPS to Readyroom’s API, which uses it for Groq requests; it is **not written to local storage or included in the frontend bundle**. Closing or refreshing the tab clears it. The live app also has a server key so evaluators can complete the journey without creating an account or supplying a key.
 
